@@ -1,18 +1,39 @@
-// Ballistic burrito: drag back from the burrito and release to launch it.
+// Ballistic Burrito: set the angle and power, mind the wind, hit the car.
 (() => {
-  const canvas = document.getElementById('sky');
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('sky');
   const ctx = canvas.getContext('2d');
-  const hint = document.getElementById('hint');
+  const angleIn = $('angle'), powerIn = $('power'), fireBtn = $('fire');
+  const angleOut = $('angleOut'), powerOut = $('powerOut');
+  const windEl = $('wind'), scoreEl = $('score'), msgEl = $('hint');
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const G = 900;          // px/s^2
-  const POWER = 4.2;      // drag distance -> launch speed
-  const MAX_DRAG = 130;
-  const REST = 0.55;      // bounce restitution
 
-  let W, H, dpr, groundY, home, stars = [];
-  const b = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, flying: false };
-  let trail = [];
-  let drag = null;
+  const G = 9.8;            // m/s^2
+  const CAR_W = 8, CAR_H = 3.4;
+  const CAN_X = 5, CAN_Y = 1.2, BARREL = 3.6;
+  const STEP = 1 / 120;
+
+  let W, H, dpr, scale, worldW, groundY;
+  let carX = 60, wind = 0, shots = 0, hits = 0;
+  let b = null;             // burrito in flight: {x, y, vx, vy, rot}
+  let trail = [], lastTrail = [];
+  let celebrate = 0;        // seconds of victory sparkle left
+  let streaks = [];
+
+  const mph = () => Math.round(Math.abs(wind) * 2.5);
+
+  function newScenario() {
+    carX = worldW * (0.45 + Math.random() * 0.4);
+    carX = Math.min(carX, worldW - CAR_W - 3);
+    wind = (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 4.5);
+    lastTrail = []; trail = [];
+    const w = mph();
+    windEl.textContent = 'Wind ' + (wind < 0 ? '← ' : '→ ') + w + ' mph';
+    say('New traffic jam. Get that burrito into the car.');
+  }
+
+  function say(text) { msgEl.textContent = text; msgEl.style.opacity = 1; }
+  function updateScore() { scoreEl.textContent = 'Delivered ' + hits + ' / ' + shots; }
 
   function resize() {
     dpr = window.devicePixelRatio || 1;
@@ -20,129 +41,167 @@
     canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     groundY = H - 36;
-    home = { x: Math.min(110, W * 0.15), y: groundY - 16 };
-    if (!b.flying) { b.x = home.x; b.y = home.y; }
-    stars = Array.from({ length: Math.round(W * H / 5000) }, () => ({
-      x: Math.random() * W, y: Math.random() * groundY, r: Math.random() * 1.4 + 0.3,
+    scale = Math.max(5, Math.min(9, W / 110));   // px per metre
+    const oldW = worldW;
+    worldW = W / scale;
+    if (oldW) carX = Math.min(carX, worldW - CAR_W - 3);
+    streaks = Array.from({ length: Math.round(W / 40) }, () => ({
+      x: Math.random() * W, y: Math.random() * groundY, len: 12 + Math.random() * 28,
     }));
   }
 
-  function pos(e) {
-    const r = canvas.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  const sx = (m) => m * scale;
+  const sy = (m) => groundY - m * scale;
+
+  function fire() {
+    if (b) return;
+    const a = angleIn.value * Math.PI / 180, v = +powerIn.value;
+    b = {
+      x: CAN_X + Math.cos(a) * BARREL, y: CAN_Y + Math.sin(a) * BARREL,
+      vx: v * Math.cos(a), vy: v * Math.sin(a), rot: 0,
+    };
+    trail = [];
+    shots++; updateScore();
+    fireBtn.disabled = true;
+    say('...');
   }
 
-  canvas.addEventListener('pointerdown', (e) => {
-    const p = pos(e);
-    if (Math.hypot(p.x - b.x, p.y - b.y) > 50) return;
-    canvas.setPointerCapture(e.pointerId);
-    b.flying = false; b.vx = b.vy = 0; trail = [];
-    drag = p;
-    canvas.style.cursor = 'grabbing';
-  });
-  canvas.addEventListener('pointermove', (e) => {
-    if (!drag) return;
-    drag = pos(e);
-    let dx = drag.x - home.x, dy = drag.y - home.y;
-    const d = Math.hypot(dx, dy);
-    if (d > MAX_DRAG) { dx *= MAX_DRAG / d; dy *= MAX_DRAG / d; }
-    b.x = home.x + dx; b.y = Math.min(home.y + dy, groundY - 16);
-  });
-  const release = () => {
-    if (!drag) return;
-    drag = null;
-    canvas.style.cursor = 'grab';
-    b.vx = (home.x - b.x) * POWER;
-    b.vy = (home.y - b.y) * POWER;
-    if (Math.hypot(b.vx, b.vy) < 40) { b.x = home.x; b.y = home.y; return; }
-    b.flying = true;
-    hint.style.opacity = 0;
-  };
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
-
-  let last = performance.now();
-  function frame(now) {
-    const dt = Math.min((now - last) / 1000, 0.03);
-    last = now;
-
-    if (b.flying) {
-      b.vy += G * dt;
-      b.x += b.vx * dt; b.y += b.vy * dt;
-      b.rot += b.vx * dt * 0.02;
-      trail.push({ x: b.x, y: b.y });
-      if (trail.length > 400) trail.shift();
-      if (b.x < 12) { b.x = 12; b.vx = Math.abs(b.vx) * REST; }
-      if (b.x > W - 12) { b.x = W - 12; b.vx = -Math.abs(b.vx) * REST; }
-      if (b.y > groundY - 16) {
-        b.y = groundY - 16;
-        b.vy = -b.vy * REST;
-        b.vx *= 0.85;
-        if (Math.abs(b.vy) < 60) { b.vy = 0; b.vx *= 0.9; }
-        if (Math.abs(b.vx) < 8 && b.vy === 0) {
-          // settle, then go back to the launch pad after a moment
-          b.flying = false;
-          setTimeout(() => { if (!b.flying && !drag) { b.x = home.x; b.y = home.y; b.rot = 0; trail = []; } }, 1800);
-        }
-      }
+  function land(hit, xLand) {
+    b = null;
+    fireBtn.disabled = false;
+    lastTrail = trail; trail = [];
+    if (hit) {
+      hits++; updateScore();
+      celebrate = 1.6;
+      say(pick([
+        'Direct hit! Fresh burrito, delivered.',
+        'Nothing but sunroof. Nice.',
+        'Guac is extra, but you earned it.',
+        'Right in the cupholder!',
+      ]));
+      setTimeout(newScenario, 1800);
+    } else {
+      const off = xLand - (carX + CAR_W / 2);
+      const d = Math.abs(Math.round(off));
+      say(off < 0 ? 'Short by ' + d + ' m. More power, or a higher arc.' : 'Long by ' + d + ' m. Ease off.');
     }
+  }
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
+  function step(dt) {
+    b.vx += wind * dt;
+    b.vy -= G * dt;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    b.rot += dt * 8;
+    if (b.x >= carX && b.x <= carX + CAR_W && b.y <= CAR_H && b.y > 0) return land(true, b.x);
+    if (b.y <= 0) return land(false, b.x);
+    if (b.x < -20 || b.x > worldW + 40) return land(false, b.x);
+  }
+
+  let last = performance.now(), acc = 0;
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    if (b) {
+      acc += dt;
+      while (b && acc >= STEP) { step(STEP); acc -= STEP; if (b && (trail.length === 0 || Math.round(b.x * 4) !== trail._k)) { trail.push({ x: b.x, y: b.y }); trail._k = Math.round(b.x * 4); } }
+    }
+    if (celebrate > 0) celebrate -= dt;
+    for (const s of streaks) {                // wind streaks drift with the wind
+      s.x += wind * dt * scale * 3;
+      if (s.x > W + 40) s.x = -40;
+      if (s.x < -40) s.x = W + 40;
+    }
     draw();
     requestAnimationFrame(frame);
+  }
+
+  function drawTrail(t, alpha) {
+    ctx.fillStyle = css('--trail');
+    ctx.globalAlpha = alpha;
+    for (const p of t) { ctx.beginPath(); ctx.arc(sx(p.x), sy(p.y), 2.5, 0, 6.283); ctx.fill(); }
+    ctx.globalAlpha = 1;
   }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    ctx.fillStyle = css('--star');
-    for (const s of stars) { ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); }
+    ctx.strokeStyle = css('--muted'); ctx.lineWidth = 1.5; ctx.globalAlpha = 0.35;
+    for (const s of streaks) {
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + Math.sign(wind) * s.len, s.y); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
 
     ctx.fillStyle = css('--ground');
     ctx.fillRect(0, groundY, W, H - groundY);
 
-    // launch pad marker
-    ctx.strokeStyle = css('--muted'); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(home.x - 22, groundY); ctx.lineTo(home.x + 22, groundY); ctx.stroke();
+    // cannon
+    const a = angleIn.value * Math.PI / 180;
+    ctx.save();
+    ctx.translate(sx(CAN_X), sy(CAN_Y));
+    ctx.rotate(-a);
+    ctx.fillStyle = css('--fg');
+    ctx.fillRect(-sx(0.6), -sx(0.8), sx(BARREL + 0.6), sx(1.6));
+    ctx.restore();
+    ctx.fillStyle = css('--fg');
+    ctx.beginPath(); ctx.arc(sx(CAN_X), sy(CAN_Y), sx(1.6), 0, 6.283); ctx.fill();
+    ctx.fillStyle = css('--bg');
+    ctx.beginPath(); ctx.arc(sx(CAN_X), sy(CAN_Y), sx(0.6), 0, 6.283); ctx.fill();
 
-    // trail
-    ctx.fillStyle = css('--trail');
-    trail.forEach((p, i) => {
-      if (i % 4) return;
-      ctx.globalAlpha = i / trail.length;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, 6.283); ctx.fill();
-    });
-    ctx.globalAlpha = 1;
-
-    // aim preview + band
-    if (drag) {
-      const vx = (home.x - b.x) * POWER, vy = (home.y - b.y) * POWER;
-      ctx.fillStyle = css('--accent');
-      for (let t = 0.04; t < 3; t += 0.06) {
-        const x = b.x + vx * t, y = b.y + vy * t + 0.5 * G * t * t;
-        if (y > groundY) break;
-        ctx.globalAlpha = 1 - t / 3;
-        ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 6.283); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = css('--muted'); ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(home.x, home.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    // car
+    ctx.font = Math.round(sx(CAR_W) * 0.95) + 'px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    const bounce = celebrate > 0 ? Math.abs(Math.sin(celebrate * 14)) * 6 : 0;
+    ctx.fillText('🚗', sx(carX + CAR_W / 2), groundY + sx(0.6) - bounce);
+    if (celebrate > 0) {
+      ctx.font = '28px serif';
+      ctx.fillText('🎉', sx(carX + CAR_W / 2), groundY - sx(CAR_H) - 14 - bounce);
     }
 
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.rotate(b.rot);
-    ctx.font = '34px serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🌯', 0, 2);
-    ctx.restore();
+    drawTrail(lastTrail, 0.25);
+    drawTrail(trail, 0.9);
+
+    if (b) {
+      ctx.save();
+      ctx.translate(sx(b.x), sy(b.y));
+      ctx.rotate(b.rot);
+      ctx.font = '30px serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🌯', 0, 2);
+      ctx.restore();
+    }
   }
 
+  // controls
+  const sync = () => { angleOut.textContent = angleIn.value + '°'; powerOut.textContent = powerIn.value; };
+  angleIn.addEventListener('input', sync);
+  powerIn.addEventListener('input', sync);
+  fireBtn.addEventListener('click', fire);
+  document.querySelectorAll('.step').forEach((btn) => {
+    const input = $(btn.dataset.target);
+    let timer;
+    const bump = () => {
+      input.value = Math.max(+input.min, Math.min(+input.max, +input.value + +btn.dataset.d));
+      sync();
+    };
+    const stop = () => { clearInterval(timer); clearTimeout(timer); };
+    btn.addEventListener('pointerdown', () => {        // tap = 1 step, hold = repeat
+      bump();
+      timer = setTimeout(() => { timer = setInterval(bump, 60); }, 350);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((e) => btn.addEventListener(e, stop));
+    btn.addEventListener('keydown', (e) => { if (e.key === 'Enter') bump(); });
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target.tagName !== 'BUTTON') { e.preventDefault(); fire(); }
+  });
   window.addEventListener('resize', resize);
-  resize();
+
+  sync(); resize(); newScenario(); updateScore();
   requestAnimationFrame(frame);
 
   // ---- live GitHub star counts (silently skipped if the API is unavailable) ----
-  document.getElementById('yr').textContent = new Date().getFullYear();
+  $('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('.repo[data-repo]').forEach(async (el) => {
     try {
       const key = 'gh:' + el.dataset.repo;

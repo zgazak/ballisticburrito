@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ballistic Burrito · Zach Gazak</title>
+<title>Zach Gazak</title>
 <meta name="description" content="Zach Gazak: astronomer and ML researcher working on vision-language model interpretability.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌯</text></svg>">
 <link rel="stylesheet" href="style.css">
@@ -11,7 +11,7 @@
 <body>
 
 <header class="hero">
-  <canvas id="sky" aria-label="Interactive ballistic burrito. Drag back from the burrito and release to launch it."></canvas>
+  <canvas id="sky" aria-label="Game: aim the burrito cannon with the angle and power controls below, allow for wind, and hit the car."></canvas>
   <div class="hero-text">
     <h1>Ballistic Burrito</h1>
     <p class="tagline">Zach Gazak &mdash; astronomer, ML researcher, now poking around inside vision-language models.</p>
@@ -22,16 +22,24 @@
       <a href="cv.pdf">CV</a>
       <a href="mailto:jzg@alum.mit.edu">Email</a>
     </nav>
-    <p class="hint" id="hint">drag back from the burrito, then let go</p>
+    <p class="hint" id="hint"></p>
   </div>
 </header>
+
+<div class="controls" role="group" aria-label="Burrito cannon controls">
+  <div class="ctl"><span>Angle</span> <button type="button" class="step" data-target="angle" data-d="-1" aria-label="Decrease angle">&minus;</button><input id="angle" aria-label="Angle" type="range" min="5" max="85" value="45"><button type="button" class="step" data-target="angle" data-d="1" aria-label="Increase angle">+</button><output id="angleOut"></output></div>
+  <div class="ctl"><span>Power</span> <button type="button" class="step" data-target="power" data-d="-1" aria-label="Decrease power">&minus;</button><input id="power" aria-label="Power" type="range" min="10" max="60" value="30"><button type="button" class="step" data-target="power" data-d="1" aria-label="Increase power">+</button><output id="powerOut"></output></div>
+  <button id="fire" type="button">Fire 🌯</button>
+  <span class="stat" id="wind"></span>
+  <span class="stat" id="score"></span>
+</div>
 
 <main>
 
 <section id="about">
   <h2>About</h2>
   <p>I'm an astronomer turned machine-learning researcher based in Haiku, Maui. I did a Ph.D. at the University of Hawaiʻi (measuring the chemistry of distant galaxies from the light of red supergiant stars), then spent time in data science, venture capital, and a startup before landing back at telescopes, this time pointing them with neural networks.</p>
-  <p>Day to day I lead a machine-intelligence research lab at U.S. Space Systems Command, building autonomous sensing systems for space domain awareness. On my own time (as <em>Sidereal LLC</em>) I'm working on <strong>interpretability of vision-language models</strong>: why they fail at spatial reasoning, and what's going on in their internals when they do.</p>
+  <p>Day to day I lead a machine-intelligence research lab at U.S. Space Systems Command, building autonomous sensing systems for space domain awareness. On my own time I'm working on <strong>interpretability of vision-language models</strong>: why they fail at spatial reasoning, and what's going on in their internals when they do.</p>
 </section>
 
 <section id="research">
@@ -63,7 +71,7 @@
     </li>
     <li>
       <span class="venue">WACV 2022</span>
-      <strong>SpectraNet: Learned Recognition of Artificial Satellites from High Contrast Spectroscopic Imagery</strong>
+      <a href="https://arxiv.org/abs/2201.03614"><strong>SpectraNet: Learned Recognition of Artificial Satellites from High Contrast Spectroscopic Imagery</strong></a>
       <span class="authors">Gazak, McQuaid, Swindle, Phelps, Fletcher</span>
     </li>
     <li>
@@ -107,14 +115,6 @@
     <a class="card repo" data-repo="zgazak/TAP" href="https://github.com/zgazak/TAP">
       <h3>TAP <span class="stars"></span></h3>
       <p>Transit Analysis Package: Bayesian MCMC exoplanet light-curve fitting, widely used in the exoplanet community.</p>
-    </a>
-    <a class="card repo" data-repo="zgazak/orient" href="https://github.com/zgazak/orient">
-      <h3>ORIENT <span class="stars"></span></h3>
-      <p>Gabor-wavelet injection into CLIP ViT for encoder-level spatial improvements.</p>
-    </a>
-    <a class="card repo" data-repo="zgazak/astra" href="https://github.com/zgazak/astra">
-      <h3>Astra <span class="stars"></span></h3>
-      <p>What do star streaks teach vision models about orientation and shape?</p>
     </a>
     <div class="card repo soon">
       <h3>Sophon</h3>
