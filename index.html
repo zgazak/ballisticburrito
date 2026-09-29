@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ballistic Burrito · Zach Gazak</title>
+<meta name="description" content="Zach Gazak: astronomer and ML researcher working on vision-language model interpretability.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌯</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="sky" aria-label="Interactive ballistic burrito. Drag back from the burrito and release to launch it."></canvas>
+  <div class="hero-text">
+    <h1>Ballistic Burrito</h1>
+    <p class="tagline">Zach Gazak &mdash; astronomer, ML researcher, now poking around inside vision-language models.</p>
+    <nav class="links">
+      <a href="https://scholar.google.com/citations?user=2G245-8AAAAJ">Scholar</a>
+      <a href="https://github.com/zgazak">GitHub</a>
+      <a href="https://linkedin.com/in/jzgazak">LinkedIn</a>
+      <a href="cv.pdf">CV</a>
+      <a href="mailto:jzg@alum.mit.edu">Email</a>
+    </nav>
+    <p class="hint" id="hint">drag back from the burrito, then let go</p>
+  </div>
+</header>
+
+<main>
+
+<section id="about">
+  <h2>About</h2>
+  <p>I'm an astronomer turned machine-learning researcher based in Haiku, Maui. I did a Ph.D. at the University of Hawaiʻi (measuring the chemistry of distant galaxies from the light of red supergiant stars), then spent time in data science, venture capital, and a startup before landing back at telescopes, this time pointing them with neural networks.</p>
+  <p>Day to day I lead a machine-intelligence research lab at U.S. Space Systems Command, building autonomous sensing systems for space domain awareness. On my own time (as <em>Sidereal LLC</em>) I'm working on <strong>interpretability of vision-language models</strong>: why they fail at spatial reasoning, and what's going on in their internals when they do.</p>
+</section>
+
+<section id="research">
+  <h2>Right now</h2>
+  <div class="cards two">
+    <article class="card">
+      <h3>VLM interpretability</h3>
+      <p>Diagnosing and mechanistically characterizing spatial reasoning failures in vision-language models: linear probes, activation patching, and readout-layer analysis across LLaVA, Qwen-VL, InternVL and friends.</p>
+    </article>
+    <article class="card">
+      <h3>Autonomous sky sensing</h3>
+      <p>Spectroscopic, neuromorphic and multispectral ML systems, from raw photons to deployed telescope networks. Star streaks, satellites, and all-sky calibration without human help.</p>
+    </article>
+  </div>
+</section>
+
+<section id="papers">
+  <h2>Selected papers</h2>
+  <ul class="papers">
+    <li>
+      <span class="venue">NeurIPS 2026 &middot; Datasets &amp; Benchmarks</span>
+      <strong>Sophon: A Procedural Diagnostic for Spatial Reasoning in Vision-Language Models</strong>
+      <span class="authors">Gazak, Swindle, Fletcher</span>
+    </li>
+    <li>
+      <span class="venue">PASP 2026</span>
+      <a href="https://doi.org/10.1088/1538-3873/ae2b35"><strong>SENPAI: Sidereal Enriched Rate-Track Astrometry in Deep Imagery of Solar System Bodies</strong></a>
+      <span class="authors">Gazak, Fisher, Phelps, Swindle, Baruela, Fletcher</span>
+    </li>
+    <li>
+      <span class="venue">WACV 2022</span>
+      <strong>SpectraNet: Learned Recognition of Artificial Satellites from High Contrast Spectroscopic Imagery</strong>
+      <span class="authors">Gazak, McQuaid, Swindle, Phelps, Fletcher</span>
+    </li>
+    <li>
+      <span class="venue">ApJ 2015</span>
+      <strong>Red Supergiants as Cosmic Abundance Probes: The Sculptor Galaxy NGC 300</strong>
+      <span class="authors">Gazak, Kudritzki, Evans, et al.</span>
+    </li>
+    <li>
+      <span class="venue">Advances in Astronomy 2012</span>
+      <strong>Transit Analysis Package: An IDL GUI for Exoplanet Transit Photometry</strong>
+      <span class="authors">Gazak, Johnson, Tonry, et al. &middot; 100+ citations</span>
+    </li>
+  </ul>
+  <p class="more">2,200+ citations across 55+ publications. <a href="https://scholar.google.com/citations?user=2G245-8AAAAJ">Full list on Google Scholar &rarr;</a></p>
+</section>
+
+<section id="lab">
+  <h2>The lab</h2>
+  <p class="sub">Open-source things I've built. Star counts load live from GitHub.</p>
+  <div class="cards" id="repos">
+    <a class="card repo" data-repo="zgazak/allclear" href="https://github.com/zgazak/allclear">
+      <h3>AllClear <span class="stars"></span></h3>
+      <p>Blind all-sky astrometric solver and directional sky-transparency mapper for autonomous observatories.</p>
+    </a>
+    <a class="card repo" data-repo="ssc-ai/senpai" href="https://github.com/ssc-ai/senpai">
+      <h3>SENPAI <span class="stars"></span></h3>
+      <p>Zero-calibration, sensor-agnostic astrometry for detecting stars and satellites. <code>pip install astro-senpai</code></p>
+    </a>
+    <a class="card repo" data-repo="zgazak/sdasim" href="https://github.com/zgazak/sdasim">
+      <h3>SDASim <span class="stars"></span></h3>
+      <p>Speed-optimized, differentiable satellite scene simulator for synthetic training data. PyTorch.</p>
+    </a>
+    <a class="card repo" data-repo="zgazak/burr" href="https://github.com/zgazak/burr">
+      <h3>Burr <span class="stars"></span></h3>
+      <p>Autonomous telescope calibration and observation scheduling for rapid-deploy observatories.</p>
+    </a>
+    <a class="card repo" data-repo="ssc-ai/astroeasy" href="https://github.com/ssc-ai/astroeasy">
+      <h3>astroeasy <span class="stars"></span></h3>
+      <p>Containerized astrometry.net plate solving with a friendly Python API.</p>
+    </a>
+    <a class="card repo" data-repo="zgazak/TAP" href="https://github.com/zgazak/TAP">
+      <h3>TAP <span class="stars"></span></h3>
+      <p>Transit Analysis Package: Bayesian MCMC exoplanet light-curve fitting, widely used in the exoplanet community.</p>
+    </a>
+    <a class="card repo" data-repo="zgazak/orient" href="https://github.com/zgazak/orient">
+      <h3>ORIENT <span class="stars"></span></h3>
+      <p>Gabor-wavelet injection into CLIP ViT for encoder-level spatial improvements.</p>
+    </a>
+    <a class="card repo" data-repo="zgazak/astra" href="https://github.com/zgazak/astra">
+      <h3>Astra <span class="stars"></span></h3>
+      <p>What do star streaks teach vision models about orientation and shape?</p>
+    </a>
+    <div class="card repo soon">
+      <h3>Sophon</h3>
+      <p>Procedural spatial-reasoning benchmark for VLMs. <code>pip install sophon-bench</code></p>
+    </div>
+  </div>
+  <p class="more"><a href="https://github.com/zgazak?tab=repositories">All repositories &rarr;</a></p>
+</section>
+
+<section id="name">
+  <h2>About the name</h2>
+  <p>Ballistic Burrito was going to be a startup: burritos delivered by cannon, straight to your car. Stuck in traffic, or commuting with no time to stop? Order a burrito and have it launched directly into your vehicle. The trajectory calculations live on in the hero above. <em>Interested investors, please <a href="mailto:jzg@alum.mit.edu?subject=Ballistic%20Burrito%20investment%20inquiry">inquire</a>.</em></p>
+</section>
+
+</main>
+
+<footer>
+  <p>&copy; <span id="yr"></span> J. Zachary Gazak &middot; Haiku, Hawaiʻi &middot; views are my own</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
