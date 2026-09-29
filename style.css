@@ -131,3 +131,8 @@ footer { padding-top: 48px; padding-bottom: 40px; color: var(--muted); font-size
 @media (max-width: 520px) {
   .hero { min-height: 440px; }
 }
+
+.about { display: flex; gap: 24px; align-items: flex-start; }
+.about p:first-child { margin-top: 0; }
+.portrait { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--line); flex: none; }
+@media (max-width: 600px) { .about { flex-direction: column; align-items: center; } .about p { text-align: left; } }
